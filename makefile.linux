@@ -1,0 +1,34 @@
+CC_host := $(shell R CMD config CXX)
+CC_gpu := nvcc
+OBJS := match.o
+CUDA_OBJS := auction.o
+
+#compiler/preprocessor options
+
+CUDA_HOME := /usr/local/cuda
+
+INCS := -I"$(shell R RHOME)/include" -I"/home/bucknerj/R/x86_64-unknown-linux-gnu-library/2.15/Rcpp/include"
+PARAMS := $(shell R CMD config CXXFLAGS) $(shell R CMD config CXXPICFLAGS)
+
+#linker options
+
+LD_PARAMS := $(shell R CMD config SHLIB_CXXLDFLAGS)
+LIBS := -L"/home/bucknerj/R/x86_64-unknown-linux-gnu-library/2.15/Rcpp/lib" -lRcpp -L"$(CUDA_HOME)/lib64" -lcudart
+
+TARGETS := match.so
+
+all: $(TARGETS) 
+
+$(TARGETS): $(OBJS) $(CUDA_OBJS)
+	$(CC_host) -shared $(LD_PARAMS) $(LIBS) $(OBJS) $(CUDA_OBJS) -o $@
+
+$(OBJS): %.o: %.cpp
+	$(CC_host) -c $(INCS) $(PARAMS) $^ -o $@
+
+$(CUDA_OBJS): %.o: %.cu
+	$(CC_gpu) -c $(INCS) -Xcompiler "$(PARAMS) -g -O2" -m64 -gencode arch=compute_20,code=sm_20 $^ -o $@
+
+clean:
+	rm -rf *o
+
+.PHONY: all clean
