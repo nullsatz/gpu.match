@@ -9,4 +9,4 @@ test.case <- as.matrix(read.table(inFn))
 
 dyn.load('/home/bucknerj/gpu.match/match.so')
 test.result <- .Call('auction', test.case)
-#print(test.result)
+print(test.result)

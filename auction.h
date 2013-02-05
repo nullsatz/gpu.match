@@ -9,5 +9,5 @@
 #define BLOCKSIZE 8
 #endif
 
-int * d_auction(int cSize, float * h_a);
+int * d_auction(int nBidders, int nItems, float * h_benefits);
 #endif
